@@ -1,0 +1,30 @@
+{
+    "Stocks": {
+        "Apple": "AAPL", 
+        "Amazon": "AMZN",
+        "Tesla": "TSLA",
+        "META": "META"
+        
+    },
+
+    "Index": {
+        "SP500": "^GSPC",
+        "DOW30": "^DJI",
+        "Nasdaq": "^IXIC"
+    },
+
+    "Commodity": {
+        "CrudeOil": "CL=F",
+        "Gold": "GC=F"
+    },
+
+    "Crypto": {
+        "BTC-USD": "BTC-USD"
+    },
+
+    "US-Bond": {
+        "10Yrs-Bond": "^TNX"
+    }
+
+    
+}
