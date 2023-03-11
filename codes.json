@@ -3,7 +3,11 @@
         "Apple": "AAPL", 
         "Amazon": "AMZN",
         "Tesla": "TSLA",
-        "META": "META"
+        "Meta": "META",
+        "Netflix": "NFLX",
+        "Google": "GOOG",
+        "AMD": "AMD",
+        "NIO": "NIO"
         
     },
 
@@ -23,7 +27,8 @@
     },
 
     "US-Bond": {
-        "10Yrs-Bond": "^TNX"
+        "10Yr-Bond": "^TNX",
+        "5Yr-Bond": "^FVX"
     }
 
     
