@@ -4,6 +4,7 @@ import gym
 import numpy as np
 import pandas as pd
 
+from logic import TradingCenter
 class Environment(gym.Env):
     __episode = 1
 
@@ -15,50 +16,29 @@ class Environment(gym.Env):
             end_date,
             interval, #'1d', '1h'
             start_capital,
+            training_cycle = 180 # days
         ):
         super().__init__()
-        self.wd = os.path.join(os.path.dirname(__file__),'..')
-        codes = os.path.join(self.wd, 'codes.json')
-        with open(codes, 'r') as f:
-            self.codes = json.load(f)
-        self.dtype_range = self.codes.keys()
+        self.TC = TradingCenter(focus_type, focus_name, start_date, end_date, interval, start_capital)
 
-        self.data_folder = os.path.join(self.wd, 'Data')
-        self.data_time_range = f'{start_date}-to-{end_date}-{interval}'
-
-        self.focus_type, self.foucs_name = focus_type, focus_name
-        self.focus_code = self.codes[focus_type][focus_name]
-        self.profolio = {focus_name: 0}
-
-        self.capital = start_capital
-        
-        self.action_space = gym.spaces.Box(
-            low=float(-1), 
-            high=float(1), 
-            shape=(1,),
-            dtype=np.float32
-        ) #percentage of buy and sell or keep
-
+        # self.action_space = gym.spaces.Box(
+        #     low=float(-1), 
+        #     high=float(1), 
+        #     shape=(1,),
+        #     dtype=np.float32
+        # ) #percentage of buy and sell or keep
         self.current_date = start_date
+        self.action_space = gym.spaces.Tuple(
+            (
+                gym.spaces.Discrete(3),
+                gym.spaces.Box(low=-1, high=1, shape=(1,)),
+                gym.spaces.Box(low=-1, high=1, shape=(1,)),
+                gym.spaces.Box(low=-1, high=1, shape=(1,))
+            )
+        )
 
-        self._init_market()
-        print(self.dfs.keys())
-        print(self.dfs['US-Bond'].keys())
-        print(self.dfs[focus_type][focus_name].head())
-        print(len(self.all_df_list))
-
-
-    def _init_market(self):
-        self.dfs = {}
-        self.all_df_list = []
-        for k in self.dtype_range:
-            k_df = {}
-            for kk in self.codes[k].keys():
-                file = os.path.join(self.data_folder, k, self.data_time_range, f'{kk}.csv')
-                df = pd.read_csv(file, sep=',')
-                k_df.update({kk: df})
-                self.all_df_list.append(df)
-            self.dfs.update({k: k_df})
+        
+       
 
     def reset(self):
         pass
@@ -77,7 +57,7 @@ class Environment(gym.Env):
         pass
 
 
-params = {
+params = {  
     'focus_type': 'Stocks',
     'focus_name': 'Tesla',
     'start_date': '2015-01-01',
@@ -87,5 +67,44 @@ params = {
 }
 
 env = Environment(**params)
+env.TC.current_date = "2015-01-05"
+print('\nPut')
+env.TC.update_profolio()
+print(env.TC.get_current_price())
+env.TC.trade('put',0.5)
+print(env.TC.profolio)
+print(env.TC.capital, env.TC.net_worth)
+env.TC.check_profiloio()
+
+env.TC.current_date = '2021-03-05'
+print('\nCall')
+env.TC.update_profolio()
+env.TC.trade('call',0.5)
+print(env.TC.get_current_price())
+env.TC.check_profiloio()
+print(env.TC.profolio)
+print(env.TC.capital, env.TC.net_worth)
+
+env.TC.current_date = '2021-05-05'
+env.TC.update_profolio()
+print(env.TC.get_current_price())
+env.TC.check_profiloio()
+print(env.TC.profolio)
+print(env.TC.capital, env.TC.net_worth)
 
 
+env.TC.current_date = '2022-09-08'
+env.TC.update_profolio()
+env.TC.check_profiloio()
+print(env.TC.get_current_price())
+print(env.TC.profolio)
+print(env.TC.capital, env.TC.net_worth)
+
+print('\nClosed')
+
+env.TC.current_date = '2022-11-08'
+#env.TC.update_profolio()
+print(env.TC.get_current_price())
+env.TC.close('put', 0.6)
+print(env.TC.profolio)
+print(env.TC.capital, env.TC.net_worth)
