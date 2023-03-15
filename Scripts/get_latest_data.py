@@ -61,20 +61,33 @@ def get_data(
         file_path = os.path.join(save_path, f'{data_name}.csv')
         data.to_csv(file_path,sep=',')
 
+def get_aritcles(start_time, end_time):
+    import requests
+    from bs4 import BeautifulSoup
+
+    quote_page = 'https://finance.yahoo.com/news'
+    page = requests.get(quote_page, headers={"User-Agent": "Mozilla/5.0"})
+    soup = BeautifulSoup(page.text, 'html.parser')
+    print(soup)
+    name_box = soup.find_all('a', attrs={'class': 'Fw(b)'})
+    for name in name_box:
+        print(name.text.strip())
+        print(name['href'])
 
 if __name__ == '__main__' :
-    cwd = os.path.join(os.path.dirname(__file__),'..')
-    codes = os.path.join(cwd, 'codes.json')
-    with open(codes, 'r') as f:
-        codes = json.load(f)
+    get_aritcles(1,2)
+    # cwd = os.path.join(os.path.dirname(__file__),'..')
+    # codes = os.path.join(cwd, 'codes.json')
+    # with open(codes, 'r') as f:
+    #     codes = json.load(f)
 
-    dtype = 'Commodity'
-    for name in codes[dtype].keys():
-        get_data(
-            dtype, 
-            name, 
-            "2022-01-01", 
-            "2023-03-01", 
-            interval='1h', 
-            save_data=True
-        )
+    # dtype = 'Commodity'
+    # for name in codes[dtype].keys():
+    #     get_data(
+    #         dtype, 
+    #         name, 
+    #         "2022-01-01", 
+    #         "2023-03-01", 
+    #         interval='1h', 
+    #         save_data=True
+    #     )
