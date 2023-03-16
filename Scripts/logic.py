@@ -106,6 +106,7 @@ class TradingCenter:
             return True
 
     def get_current_price(self, timing='Open'):
+        #print('get current price on', self.current_date)
         current_price = self.focus_df.loc[self.focus_df['Date'] == self.current_date, timing].item()
         '''
         When Date does not exist in df: 
@@ -123,8 +124,9 @@ class TradingCenter:
         if day < 5:
             if date not in [h_date[0] for h_date in holis]:
                 #print([h_date[0] for h_date in holis])
-                print("Workday...")
-                return True
+                if self.current_date in self.focus_date:
+                    print("Workday...")
+                    return True
         print("Not Workday")
         return False
 
@@ -144,7 +146,7 @@ class TradingCenter:
         If abs(type_worth) >= (type_worth + capital)*40% and type_worth < 0, all type-shares must be closed.
         '''
 
-        if abs(self.profolio['put']['worth']) >= 0.4*(self.profolio['call']['worth']+self.capital) and self.profolio['put']['worth'] < 0:
+        if abs(self.profolio['put']['worth']) >= 0.4*(self.profolio['call']['worth']+self.capital):
             self.close('put', 1)
 
     def trade(self, type, percentage):
@@ -156,7 +158,7 @@ class TradingCenter:
         if self.purchase(total_price):
             new_amount = amount + self.profolio[type]['amount']
             new_cost = total_price + self.profolio[type]['cost']
-            new_avg_price = new_cost/new_amount
+            new_avg_price = new_cost/new_amount if new_amount!= 0 else 0
             new_worth = current_price*new_amount #if type == 'call' else new_cost - \
             #    current_price*new_amount
 
@@ -175,9 +177,10 @@ class TradingCenter:
 
     def close(self, type, percentage):
         self.update_profolio('Close')
+        adj_prefix = 1 if type == 'call' else -1
         amount = normal_round(self.profolio[type]['amount']*percentage)
         if self.profolio[type]['amount'] != 0:
-            cash_out = self.profolio[type]['worth'] * \
+            cash_out = adj_prefix * self.profolio[type]['worth'] * \
                 (amount/self.profolio[type]['amount'])
         else:
             cash_out = 0
@@ -186,7 +189,7 @@ class TradingCenter:
         new_amount = self.profolio[type]['amount']-amount
         new_cost = self.profolio[type]['avg_price']*new_amount
         new_avg_price = self.profolio[type]['avg_price'] if new_amount != 0 else 0
-        new_worth = self.profolio[type]['worth'] - cash_out
+        new_worth = self.profolio[type]['worth'] - abs(cash_out)
         vals = [
             new_amount,
             new_avg_price,
